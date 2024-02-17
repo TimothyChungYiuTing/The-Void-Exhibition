@@ -50,6 +50,9 @@ public class FirstPerson : MonoBehaviour
 
     public Transform orientation;
 
+    private Vector3 forward;
+    private Vector3 right;
+
     float horizontalInput;
     float verticalInput;
 
@@ -91,7 +94,9 @@ public class FirstPerson : MonoBehaviour
         
         transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
         cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
-
+        
+        forward = orientation.forward;
+        right = orientation.right;
 
         //Ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer);
@@ -165,7 +170,7 @@ public class FirstPerson : MonoBehaviour
     private void Movement()
     {
         //Movement direction
-        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        moveDirection = forward * verticalInput + right * horizontalInput;
 
         //On ground
         if(grounded) {

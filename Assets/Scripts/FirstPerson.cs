@@ -53,13 +53,12 @@ public class FirstPerson : MonoBehaviour
     private Vector3 forward;
     private Vector3 right;
 
-    float horizontalInput;
-    float verticalInput;
+    private float horizontalInput;
+    private float verticalInput;
 
-    Vector3 moveDirection;
+    private Vector3 moveDirection;
 
-    Rigidbody rb;
-
+    private Rigidbody rb;
 
     [Header("Gallery")]
     private GameObject collidedRedFrame = null;
@@ -72,6 +71,19 @@ public class FirstPerson : MonoBehaviour
     public bool redFrameSnapped = false;
     public GameObject wall0;
     public GameObject newWall0;
+
+    //Level 2
+    public List<MeshRenderer> whiteToYellow;
+    public Material yellowMat;
+    public bool pictureMatched = false;
+    public GameObject PlayerSnap1;
+    public GameObject oldRoom;
+    public GameObject newRoom;
+    
+    private GameObject collidedBlueFrame = null;
+    public GameObject HeldBlueFrame;
+    public GameObject BlueFramePrefab;
+    private GameObject InstantiatedBlueFrame = null;
 
     // Start is called before the first frame update
     void Start()
@@ -144,18 +156,28 @@ public class FirstPerson : MonoBehaviour
         //Crouch
         if (Input.GetKeyDown(crouchKey)) {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+            HeldRedFrame.transform.localScale = new Vector3(1f, 1f/crouchYScale, 1f);
+            HeldBlueFrame.transform.localScale = new Vector3(1f, 1f/crouchYScale, 1f);
             rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
             cam.GetComponent<CameraScript>().LerpHands(1);
         }
         if (Input.GetKeyUp(crouchKey)) {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+            HeldRedFrame.transform.localScale = Vector3.one;
+            HeldBlueFrame.transform.localScale = Vector3.one;
             cam.GetComponent<CameraScript>().LerpHands(0);
         }
         if (Input.GetKeyDown(grabKey)) {
+            //Press E
             cam.GetComponent<CameraScript>().HandsGrab();
             
-            if (heldItemID == 0) {
-                TryPutDownRedFrame();
+            if (state != MovementState.crouching) {
+                if (heldItemID == 0) {
+                    TryPutDownRedFrame();
+                }
+                if (heldItemID == 1) {
+                    TryPutDownBlueFrame();
+                }
             }
             
             if (heldItemID == -1) {
@@ -166,7 +188,23 @@ public class FirstPerson : MonoBehaviour
                     InstantiatedRedFrame = null;
                     HeldRedFrame.SetActive(true);
                 }
+                else if (collidedBlueFrame != null) {
+                    heldItemID = 1;
+                    Destroy(collidedBlueFrame);
+                    collidedBlueFrame = null;
+                    InstantiatedBlueFrame = null;
+                    HeldBlueFrame.SetActive(true);
+                }
             }
+        }
+    }
+
+    private void TryPutDownBlueFrame()
+    {
+        if (HeldBlueFrame.GetComponent<HeldBlueFrame>().canPlace) {
+            heldItemID = -1;
+            InstantiatedBlueFrame = Instantiate(BlueFramePrefab, HeldBlueFrame.transform.position, HeldBlueFrame.transform.rotation);
+            HeldBlueFrame.SetActive(false);
         }
     }
 
@@ -185,7 +223,7 @@ public class FirstPerson : MonoBehaviour
         if (redFrameSnapped) {
             //Player pos and camera angle check
             bool player0_Snapped = PositionSnap(gameObject, 0.8f, 7f, 2, PlayerSnap0);
-            bool camera0_Snapped = PositionSnap(cam.gameObject, 0.5f, 7f, 7, PlayerSnap0, true);
+            bool camera0_Snapped = PositionSnap(cam.gameObject, 0.8f, 7f, 2, PlayerSnap0, true);
 
             if (player0_Snapped && camera0_Snapped) {
                 Destroy(InstantiatedRedFrame);
@@ -194,31 +232,48 @@ public class FirstPerson : MonoBehaviour
                 newWall0.SetActive(true);
             }
         }
+        
+        if (!pictureMatched) {
+            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 45f, 2, PlayerSnap1);
+            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 45f, 2, PlayerSnap1, true);
+            
+            if (player1_Snapped && camera1_Snapped) {
+                PositionSnap(gameObject, 1f, 45f, 0, PlayerSnap1);
+                foreach (MeshRenderer mr in whiteToYellow) {
+                    mr.material = yellowMat;
+                }
+                Destroy(oldRoom);
+                newRoom.SetActive(true);
+                pictureMatched = true;
+            }
+        }
     }
 
     private bool PositionSnap(GameObject originalGameObject, float distThres, float angleThres, int snapMode = 0, GameObject targetGameObject = null, bool ignorePos = false) //snapMode 0 replace, snapMode 1 reposition
     {
-        if (InstantiatedRedFrame != null) {
-            if (ignorePos || Vector3.Distance(originalGameObject.transform.position, targetGameObject.transform.position) < distThres) {
-                if (Mathf.Abs(originalGameObject.transform.eulerAngles.x - targetGameObject.transform.eulerAngles.x) < angleThres) {
-                    if (Mathf.Abs(originalGameObject.transform.eulerAngles.y - targetGameObject.transform.eulerAngles.y) < angleThres) {
-                        if (Mathf.Abs(originalGameObject.transform.eulerAngles.z - targetGameObject.transform.eulerAngles.z) < angleThres) {
-                                
-                                if (snapMode == 0) {
-                                    originalGameObject.transform.position = targetGameObject.transform.position;
-                                    originalGameObject.transform.rotation = targetGameObject.transform.rotation;
-                                }
+        if (originalGameObject == null)
+            return false;
+        
+        if (ignorePos || Vector3.Distance(originalGameObject.transform.position, targetGameObject.transform.position) < distThres) {
+            if (Mathf.Abs(originalGameObject.transform.eulerAngles.x - targetGameObject.transform.eulerAngles.x) < angleThres) {
+                if (Mathf.Abs(originalGameObject.transform.eulerAngles.y - targetGameObject.transform.eulerAngles.y) < angleThres) {
+                    if (Mathf.Abs(originalGameObject.transform.eulerAngles.z - targetGameObject.transform.eulerAngles.z) < angleThres) {
+                            
+                            if (snapMode == 0) {
+                                originalGameObject.transform.position = targetGameObject.transform.position;
+                                originalGameObject.transform.rotation = targetGameObject.transform.rotation;
+                            }
 
-                                if (snapMode == 1) {
-                                    targetGameObject.SetActive(true);
-                                    Destroy(originalGameObject);
-                                }
-                                return true;
-                        }
+                            if (snapMode == 1) {
+                                targetGameObject.SetActive(true);
+                                Destroy(originalGameObject);
+                            }
+                            return true;
                     }
                 }
             }
         }
+
         return false;
     }
 
@@ -282,11 +337,17 @@ public class FirstPerson : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("RedFrame")) {
             collidedRedFrame = other.gameObject;
         }
+        if (other.gameObject.layer == LayerMask.NameToLayer("BlueFrame")) {
+            collidedBlueFrame = other.gameObject;
+        }
     }
 
     private void OnTriggerExit(Collider other) {
         if (other.gameObject.layer == LayerMask.NameToLayer("RedFrame")) {
             collidedRedFrame = null;
+        }
+        if (other.gameObject.layer == LayerMask.NameToLayer("BlueFrame")) {
+            collidedBlueFrame = null;
         }
     }
 }

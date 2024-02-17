@@ -535,6 +535,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1153229996308634832}
   - component: {fileID: 5410839039696036156}
+  - component: {fileID: -3255979226785746885}
   m_Layer: 10
   m_Name: HeldFramePainting
   m_TagString: Untagged
@@ -583,3 +584,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 6.2, y: 3, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-3255979226785746885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489281227009797333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e470be0fb35aece40b316389e8f3a63b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canPlace: 0

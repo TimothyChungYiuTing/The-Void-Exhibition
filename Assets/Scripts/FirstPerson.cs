@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,6 +56,13 @@ public class FirstPerson : MonoBehaviour
     Vector3 moveDirection;
 
     Rigidbody rb;
+
+    [Header("Gallery")]
+    private GameObject redFrame = null;
+    private int heldItemID = -1;
+    public GameObject HeldRedFrame;
+    public GameObject InstantiatedRedFrame;
+    public GameObject PerfectRedFrame;
 
     // Start is called before the first frame update
     void Start()
@@ -131,7 +139,27 @@ public class FirstPerson : MonoBehaviour
         }
         if (Input.GetKeyDown(grabKey)) {
             cam.GetComponent<CameraScript>().HandsGrab();
+            
+            if (heldItemID == 0) {
+                TryPutDownRedFrame();
+            }
+            
+            if (heldItemID == -1) {
+                if (redFrame != null) {
+                    heldItemID = 0;
+                    Destroy(redFrame);
+                    redFrame = null;
+                    HeldRedFrame.SetActive(true);
+                }
+            }
         }
+    }
+
+    private void TryPutDownRedFrame()
+    {
+        heldItemID = -1;
+        Instantiate(InstantiatedRedFrame, HeldRedFrame.transform.position, HeldRedFrame.transform.rotation);
+        HeldRedFrame.SetActive(false);
     }
 
     private void Movement()
@@ -187,6 +215,18 @@ public class FirstPerson : MonoBehaviour
         }
         else {
             state = MovementState.air;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.layer == LayerMask.NameToLayer("RedFrame")) {
+            redFrame = other.gameObject;
+        }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        if (other.gameObject.layer == LayerMask.NameToLayer("RedFrame")) {
+            redFrame = null;
         }
     }
 }

@@ -20319,10 +20319,10 @@ MonoBehaviour:
   cam: {fileID: 963194227}
   sensX: 300
   sensY: 300
-  walkSpeed: 8
+  walkSpeed: 6.5
   groundDrag: 5
   state: 0
-  jumpForce: 9
+  jumpForce: 12
   jumpCooldown: 1
   airMultiplier: 0.15
   crouchSpeed: 2

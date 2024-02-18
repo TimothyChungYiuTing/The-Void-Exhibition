@@ -85,6 +85,13 @@ public class FirstPerson : MonoBehaviour
     public GameObject BlueFramePrefab;
     private GameObject InstantiatedBlueFrame = null;
 
+    //Level 3
+    public bool barsAligned = false;
+    public GameObject PlayerSnap2;
+    public GameObject oldWall;
+    public GameObject newWall;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -234,8 +241,8 @@ public class FirstPerson : MonoBehaviour
         }
         
         if (!pictureMatched) {
-            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 45f, 2, PlayerSnap1);
-            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 45f, 2, PlayerSnap1, true);
+            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 35f, 2, PlayerSnap1);
+            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 35f, 2, PlayerSnap1, true);
             
             if (player1_Snapped && camera1_Snapped) {
                 PositionSnap(gameObject, 1f, 45f, 0, PlayerSnap1);
@@ -245,6 +252,18 @@ public class FirstPerson : MonoBehaviour
                 Destroy(oldRoom);
                 newRoom.SetActive(true);
                 pictureMatched = true;
+            }
+        }
+        
+        if (!barsAligned) {
+            bool player2_Snapped = PositionSnap(gameObject, 0.3f, 25f, 2, PlayerSnap2);
+            bool camera2_Snapped = PositionSnap(cam.gameObject, 0.3f, 25f, 2, PlayerSnap2, true);
+            
+            if (player2_Snapped && camera2_Snapped) {
+                PositionSnap(gameObject, 0.5f, 45f, 0, PlayerSnap2);
+                Destroy(oldWall);
+                newWall.SetActive(true);
+                barsAligned = true;
             }
         }
     }

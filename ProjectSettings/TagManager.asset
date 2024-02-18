@@ -23,8 +23,8 @@ TagManager:
   - PlacementBlock2
   - BlackFrame
   - HeldBlackFrame
-  - 
-  - 
+  - LoopTrigger
+  - ExitLoopTrigger
   - 
   - 
   - 

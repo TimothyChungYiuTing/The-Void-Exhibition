@@ -85,11 +85,28 @@ public class FirstPerson : MonoBehaviour
     public GameObject BlueFramePrefab;
     private GameObject InstantiatedBlueFrame = null;
 
+    //Level 2.5
+    public bool loopExited = false;
+    public bool inLoop = false;
+    public bool outOfLoopTrigger = false;
+    public GameObject OriginalRooms;
+    public GameObject roomsOut;
+
     //Level 3
     public bool barsAligned = false;
     public GameObject PlayerSnap2;
+    public GameObject startWall;
     public GameObject oldWall;
     public GameObject newWall;
+
+    public GameObject endlessMirror;
+    public GameObject BlackFrame;
+
+    //Level 4
+    private GameObject collidedBlackFrame = null;
+    public GameObject HeldBlackFrame;
+    public GameObject BlackFramePrefab;
+    private GameObject InstantiatedBlackFrame = null;
 
 
     // Start is called before the first frame update
@@ -138,6 +155,31 @@ public class FirstPerson : MonoBehaviour
         
         //Snaps
         ObjectSnaps();
+        if (!loopExited && inLoop) {
+            Loop();
+        }
+
+        //Debug from Level 4
+        if (Input.GetKeyDown(KeyCode.Tab)) {
+            //2.5 done
+            roomsOut.SetActive(true);
+            Destroy(OriginalRooms);
+
+            //3 done
+            Destroy(startWall);
+            Destroy(oldWall);
+            newWall.SetActive(true);
+            BlackFrame.SetActive(true);
+
+            barsAligned = true;
+            loopExited = true;
+            
+            inLoop = false;
+            
+            Destroy(oldRoom);
+            newRoom.SetActive(true);
+            pictureMatched = true;
+        }
     }
 
     private void FixedUpdate()
@@ -185,6 +227,9 @@ public class FirstPerson : MonoBehaviour
                 if (heldItemID == 1) {
                     TryPutDownBlueFrame();
                 }
+                if (heldItemID == 2) {
+                    TryPutDownBlackFrame();
+                }
             }
             
             if (heldItemID == -1) {
@@ -202,7 +247,23 @@ public class FirstPerson : MonoBehaviour
                     InstantiatedBlueFrame = null;
                     HeldBlueFrame.SetActive(true);
                 }
+                else if (collidedBlackFrame != null) {
+                    heldItemID = 2;
+                    Destroy(collidedBlackFrame);
+                    collidedBlackFrame = null;
+                    InstantiatedBlackFrame = null;
+                    HeldBlackFrame.SetActive(true);
+                }
             }
+        }
+    }
+
+    private void TryPutDownBlackFrame()
+    {
+        if (HeldBlackFrame.GetComponent<HeldBlackFrame>().canPlace) {
+            heldItemID = -1;
+            InstantiatedBlackFrame = Instantiate(BlackFramePrefab, HeldBlackFrame.transform.position, HeldBlackFrame.transform.rotation);
+            HeldBlackFrame.SetActive(false);
         }
     }
 
@@ -241,11 +302,11 @@ public class FirstPerson : MonoBehaviour
         }
         
         if (!pictureMatched) {
-            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 35f, 2, PlayerSnap1);
-            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 35f, 2, PlayerSnap1, true);
+            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 45f, 2, PlayerSnap1);
+            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 45f, 2, PlayerSnap1, true);
             
             if (player1_Snapped && camera1_Snapped) {
-                PositionSnap(gameObject, 1f, 45f, 0, PlayerSnap1);
+                PositionSnap(gameObject, 1.5f, 45f, 0, PlayerSnap1);
                 foreach (MeshRenderer mr in whiteToYellow) {
                     mr.material = yellowMat;
                 }
@@ -255,14 +316,17 @@ public class FirstPerson : MonoBehaviour
             }
         }
         
-        if (!barsAligned) {
-            bool player2_Snapped = PositionSnap(gameObject, 0.3f, 25f, 2, PlayerSnap2);
-            bool camera2_Snapped = PositionSnap(cam.gameObject, 0.3f, 25f, 2, PlayerSnap2, true);
+        if (loopExited && !barsAligned) {
+            bool player2_Snapped = PositionSnap(gameObject, 0.6f, 25f, 2, PlayerSnap2);
+            bool camera2_Snapped = PositionSnap(cam.gameObject, 0.6f, 25f, 2, PlayerSnap2, true);
             
             if (player2_Snapped && camera2_Snapped) {
-                PositionSnap(gameObject, 0.5f, 45f, 0, PlayerSnap2);
+                PositionSnap(gameObject, 0.6f, 45f, 0, PlayerSnap2);
+                Destroy(startWall);
                 Destroy(oldWall);
                 newWall.SetActive(true);
+                BlackFrame.SetActive(true);
+
                 barsAligned = true;
             }
         }
@@ -294,6 +358,25 @@ public class FirstPerson : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void Loop()
+    {
+        if (transform.position.x < -72f) {
+            if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 90, 0)) > 70f)
+                transform.position = new Vector3(transform.position.x + 80f, transform.position.y, transform.position.z);
+        }
+
+        if (outOfLoopTrigger) {
+            if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 180, 0)) < 70f) {
+                inLoop = false;
+                loopExited = true;
+                
+                oldWall.SetActive(true);
+                roomsOut.SetActive(true);
+                Destroy(OriginalRooms);
+            }
+        }
     }
 
     private void Movement()
@@ -359,6 +442,18 @@ public class FirstPerson : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("BlueFrame")) {
             collidedBlueFrame = other.gameObject;
         }
+        if (other.gameObject.layer == LayerMask.NameToLayer("BlackFrame")) {
+            collidedBlackFrame = other.gameObject;
+        }
+        if (!loopExited) {
+            if (other.gameObject.layer == LayerMask.NameToLayer("LoopTrigger")) {
+                inLoop = true;
+                endlessMirror.SetActive(true);
+            }
+            if (other.gameObject.layer == LayerMask.NameToLayer("ExitLoopTrigger")) {
+                outOfLoopTrigger = true;
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other) {
@@ -367,6 +462,18 @@ public class FirstPerson : MonoBehaviour
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("BlueFrame")) {
             collidedBlueFrame = null;
+        }
+        if (other.gameObject.layer == LayerMask.NameToLayer("BlackFrame")) {
+            collidedBlackFrame = null;
+        }
+        if (!loopExited) {
+            if (other.gameObject.layer == LayerMask.NameToLayer("LoopTrigger")) {
+                inLoop = false;
+                endlessMirror.SetActive(false);
+            }
+            if (other.gameObject.layer == LayerMask.NameToLayer("ExitLoopTrigger")) {
+                outOfLoopTrigger = false;
+            }
         }
     }
 }

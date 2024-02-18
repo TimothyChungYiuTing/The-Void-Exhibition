@@ -5337,12 +5337,12 @@ GameObject:
   - component: {fileID: 208299329}
   - component: {fileID: 208299328}
   m_Layer: 0
-  m_Name: Floor (15)
+  m_Name: Level3 OldWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &208299328
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5427,8 +5427,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2025999981}
-  m_Father: {fileID: 921252472}
-  m_RootOrder: -1
+  m_Father: {fileID: 0}
+  m_RootOrder: 104
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &227477931
 GameObject:
@@ -11226,7 +11226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_RootOrder
-      value: 106
+      value: 109
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_LocalScale.x
@@ -18995,7 +18995,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_RootOrder
-      value: 105
+      value: 108
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_LocalScale.x
@@ -23177,7 +23177,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &890254651
 Transform:
   m_ObjectHideFlags: 0
@@ -23197,7 +23197,7 @@ Transform:
   - {fileID: 1527889231}
   - {fileID: 1993606162}
   m_Father: {fileID: 0}
-  m_RootOrder: 103
+  m_RootOrder: 105
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &892498260
 GameObject:
@@ -24171,7 +24171,6 @@ Transform:
   - {fileID: 1796734267}
   - {fileID: 881534216}
   - {fileID: 2018404394}
-  - {fileID: 208299331}
   - {fileID: 1523768180}
   - {fileID: 1891976800}
   - {fileID: 584158928}
@@ -35629,7 +35628,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 110
+  m_RootOrder: 103
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1326849360
 GameObject:
@@ -36584,7 +36583,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 111
+  m_RootOrder: 112
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1373198160
 GameObject:
@@ -36826,7 +36825,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 109
+  m_RootOrder: 111
   m_LocalEulerAnglesHint: {x: 0, y: -31.096, z: 0}
 --- !u!1 &1378361451
 GameObject:
@@ -38847,7 +38846,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_RootOrder
-      value: 104
+      value: 107
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_LocalScale.x
@@ -52970,7 +52969,7 @@ Transform:
   - {fileID: 568883396}
   - {fileID: 1625048175}
   m_Father: {fileID: 0}
-  m_RootOrder: 108
+  m_RootOrder: 106
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1833772590
 GameObject:
@@ -58363,7 +58362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2693475414420726936, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3752270575174565811, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_LocalScale.x
@@ -61373,7 +61372,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_RootOrder
-      value: 107
+      value: 110
       objectReference: {fileID: 0}
     - target: {fileID: 3961622819029142402, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
       propertyPath: m_LocalScale.x

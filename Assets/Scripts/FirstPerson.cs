@@ -108,6 +108,9 @@ public class FirstPerson : MonoBehaviour
     public GameObject BlackFramePrefab;
     private GameObject InstantiatedBlackFrame = null;
 
+    //Fall
+    public GameObject BlackFloor;
+
 
     // Start is called before the first frame update
     void Start()
@@ -453,6 +456,9 @@ public class FirstPerson : MonoBehaviour
             if (other.gameObject.layer == LayerMask.NameToLayer("ExitLoopTrigger")) {
                 outOfLoopTrigger = true;
             }
+        }
+        if (other.gameObject.layer == LayerMask.NameToLayer("FallTrigger")) {
+            Destroy(BlackFloor);
         }
     }
 

@@ -1,11 +1,38 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Rendering;
+using URPGlitch.Runtime.AnalogGlitch;
+using URPGlitch.Runtime.DigitalGlitch;
 
 public class FirstPerson : MonoBehaviour
 {
+    public bool transitioning = false;
+
     public Camera cam;
+    public Volume globalVolume;
+
+    public Image Image_BG;
+    public TextMeshProUGUI Text_Level;
+
+    private AnalogGlitchVolume analogGlitchVolume;
+    private DigitalGlitchVolume digitalGlitchVolume;
+    private int textPointer = 0;
+    private List<String> textToShow = new List<String>{
+        "1",
+        "Scaffold",
+        "2",
+        "Parallel Palette",
+        "3",
+        "Cycle Breaker",
+        "4.1",
+        "Hole - (Formation)",
+        "4.2",
+        "Hole - (The Third Eye)",
+    };
 
     public float sensX;
     public float sensY;
@@ -61,6 +88,8 @@ public class FirstPerson : MonoBehaviour
     private Rigidbody rb;
 
     [Header("Gallery")]
+    //Level 1
+    private bool level1Done = false;
     private GameObject collidedRedFrame = null;
     private int heldItemID = -1;
     public GameObject HeldRedFrame;
@@ -124,6 +153,9 @@ public class FirstPerson : MonoBehaviour
         readyToJump = true;
 
         startYScale = transform.localScale.y;
+
+        globalVolume.profile.TryGet<AnalogGlitchVolume>(out analogGlitchVolume);
+        globalVolume.profile.TryGet<DigitalGlitchVolume>(out digitalGlitchVolume);
     }
 
     // Update is called once per frame
@@ -146,7 +178,9 @@ public class FirstPerson : MonoBehaviour
         //Ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer);
 
-        CharacterInputs();
+        if (!transitioning)
+            CharacterInputs();
+        
         SpeedControl();
         StateHandler();
 
@@ -187,7 +221,8 @@ public class FirstPerson : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Movement();
+        if (!transitioning)
+            Movement();
     }
 
     private void CharacterInputs()
@@ -199,7 +234,7 @@ public class FirstPerson : MonoBehaviour
         if(Input.GetKey(jumpKey) && readyToJump && grounded)
         {
             readyToJump = false;
-
+        
             Jump();
 
             Invoke(nameof(ResetJump), jumpCooldown);
@@ -294,16 +329,20 @@ public class FirstPerson : MonoBehaviour
     {
         //Level 1
         redFrameSnapped = PositionSnap(InstantiatedRedFrame, 0.5f, 4f, 0, PerfectRedFrame);
-        if (redFrameSnapped) {
-            //Player pos and camera angle check
-            bool player0_Snapped = PositionSnap(gameObject, 0.8f, 7f, 2, PlayerSnap0);
-            bool camera0_Snapped = PositionSnap(cam.gameObject, 0.8f, 7f, 2, PlayerSnap0, true);
+        if (!level1Done) {
+            if (redFrameSnapped) {
+                //Player pos and camera angle check
+                bool player0_Snapped = PositionSnap(gameObject, 0.8f, 7f, 2, PlayerSnap0);
+                bool camera0_Snapped = PositionSnap(cam.gameObject, 0.8f, 7f, 2, PlayerSnap0, true);
 
-            if (player0_Snapped && camera0_Snapped) {
-                Destroy(InstantiatedRedFrame);
-                PositionSnap(gameObject, 0.8f, 7f, 0, PlayerSnap0);
-                Destroy(wall0);
-                newWall0.SetActive(true);
+                if (player0_Snapped && camera0_Snapped) {
+                    StartCoroutine(Tada(0f, 0.4f));
+                    Destroy(InstantiatedRedFrame);
+                    PositionSnap(gameObject, 0.8f, 7f, 0, PlayerSnap0);
+                    Destroy(wall0);
+                    newWall0.SetActive(true);
+                    level1Done = true;
+                }
             }
         }
         
@@ -313,6 +352,7 @@ public class FirstPerson : MonoBehaviour
             bool camera1_Snapped = PositionSnap(cam.gameObject, 1.2f, 35f, 2, PlayerSnap1, true);
             
             if (player1_Snapped && camera1_Snapped) {
+                StartCoroutine(Tada(0f, 0.4f));
                 PositionSnap(gameObject, 1.3f, 40f, 0, PlayerSnap1);
                 foreach (MeshRenderer mr in whiteToYellow) {
                     mr.material = yellowMat;
@@ -326,9 +366,10 @@ public class FirstPerson : MonoBehaviour
         //Level 4.1
         if (loopExited && !barsAligned) {
             bool player2_Snapped = PositionSnap(gameObject, 0.8f, 40f, 2, PlayerSnap2);
-            bool camera2_Snapped = PositionSnap(cam.gameObject, 1.3f, 70f, 2, PlayerSnap2, true);
+            //bool camera2_Snapped = PositionSnap(cam.gameObject, 1.3f, 70f, 2, PlayerSnap2, true);
             
-            if (player2_Snapped && camera2_Snapped) {
+            if (player2_Snapped/* && camera2_Snapped*/) {
+                StartCoroutine(Tada(0f, 0.4f));
                 PositionSnap(gameObject, 0.8f, 40f, 0, PlayerSnap2);
                 Destroy(startWall);
                 Destroy(oldWall);
@@ -377,6 +418,7 @@ public class FirstPerson : MonoBehaviour
 
         if (outOfLoopTrigger) {
             if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 180, 0)) < 70f) {
+                StartCoroutine(Tada(0f, 0.4f));
                 inLoop = false;
                 loopExited = true;
                 
@@ -457,12 +499,19 @@ public class FirstPerson : MonoBehaviour
             if (other.gameObject.layer == LayerMask.NameToLayer("LoopTrigger")) {
                 inLoop = true;
                 endlessMirror.SetActive(true);
+                //Remove red or blue frames to prevent cheese
+                if (heldItemID == 0 || heldItemID == 1) {
+                    heldItemID = -1;
+                    HeldRedFrame.SetActive(false);
+                    HeldBlueFrame.SetActive(false);
+                }
             }
             if (other.gameObject.layer == LayerMask.NameToLayer("ExitLoopTrigger")) {
                 outOfLoopTrigger = true;
             }
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("FallTrigger")) {
+            StartCoroutine(Tada(0f, 0.4f));
             Destroy(BlackFloor);
         }
     }
@@ -486,5 +535,107 @@ public class FirstPerson : MonoBehaviour
                 outOfLoopTrigger = false;
             }
         }
+    }
+    
+    /*
+    public IEnumerator RectTranslation(Transform transform, float delay, float duration, Vector2 from, Vector2 to, bool fadeIn = false)
+    {
+        delay *= animSpdMult;
+        duration *= animSpdMult;
+        Image image = null;
+        Color fromColor = Color.clear;
+        Color toColor = Color.white;
+        if (fadeIn) {
+            image = transform.GetComponent<Image>();
+            toColor = image.color;
+            fromColor = image.color;
+            fromColor.a = 0f;
+            image.color = Color.clear;
+        }
+        float timer = 0f;
+        float t;
+        Vector2 interpolatedPosition;
+        RectTransform rectTransform = transform.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = from;
+
+        yield return new WaitForSeconds(delay);
+
+        while (timer < duration)
+        {
+            //Debug.Log(timer);
+            t = Mathf.Clamp01(timer/duration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+            if (fadeIn) {
+                image.color = Color.Lerp(fromColor, toColor, t);
+            }
+            // Do something each frame
+            interpolatedPosition = Vector2.Lerp(from, to, t);
+            //Debug.Log(interpolatedPosition);
+            rectTransform.anchoredPosition = interpolatedPosition;
+            //transform.localPosition = transform.localPosition; // Force update on the transform
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        rectTransform.anchoredPosition = to;
+    }
+    */
+
+    private IEnumerator Tada(float delay, float duration) {
+        transitioning = true;
+        float timer = 0f;
+        float t;
+
+        yield return new WaitForSeconds(delay);
+
+        while (timer < duration)
+        {
+            t = Mathf.Clamp01(timer/duration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            //analogGlitchVolume.verticalJump.value = 0.1f;
+            //analogGlitchVolume.horizontalShake.value = 0.25f;
+            analogGlitchVolume.scanLineJitter.value = 0.1f;
+            analogGlitchVolume.colorDrift.value = 0.15f;
+            //digitalGlitchVolume.intensity.value = 0.01f;
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        //Todo: Exit back to original settings
+        transitioning = false;
+        analogGlitchVolume.scanLineJitter.value = 0.02f;
+        analogGlitchVolume.colorDrift.value = 0f;
+        digitalGlitchVolume.intensity.value = 0f;
+    }
+
+    private IEnumerator NewArea(float delay, float duration, int textIndex) {
+        transitioning = true;
+        float timer = 0f;
+        float t;
+
+        yield return new WaitForSeconds(delay);
+        
+        
+
+        while (timer < duration)
+        {
+            t = Mathf.Clamp01(timer/duration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            //analogGlitchVolume.verticalJump.value = 0.1f;
+            //analogGlitchVolume.horizontalShake.value = 0.25f;
+            analogGlitchVolume.scanLineJitter.value = 0.1f;
+            analogGlitchVolume.colorDrift.value = 0.15f;
+            //digitalGlitchVolume.intensity.value = 0.01f;
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        //Todo: Exit back to original settings
+        transitioning = false;
+        analogGlitchVolume.scanLineJitter.value = 0.02f;
+        analogGlitchVolume.colorDrift.value = 0f;
+        digitalGlitchVolume.intensity.value = 0f;
     }
 }

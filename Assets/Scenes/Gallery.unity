@@ -20317,6 +20317,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 963194227}
+  globalVolume: {fileID: 728177309}
+  Image_BG: {fileID: 1537854545}
+  Text_Level: {fileID: 1430462586}
   sensX: 300
   sensY: 300
   walkSpeed: 6.5
@@ -40315,7 +40318,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 65471
+    m_Bits: 262047
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -61589,6 +61592,17 @@ PrefabInstance:
       addedObject: {fileID: 1912669697}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dbee60ec0d8abe4479101401f63bfe46, type: 3}
+--- !u!114 &1430462586 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 753660557355109892, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+  m_PrefabInstance: {fileID: 4127882405328537594}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1431818406
 GameObject:
   m_ObjectHideFlags: 0
@@ -67242,6 +67256,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de095a27a08b145a28c019fa6453db, type: 3}
+--- !u!114 &1537854545 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1184956024916362099, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+  m_PrefabInstance: {fileID: 4127882405328537594}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1537970101
 GameObject:
   m_ObjectHideFlags: 0
@@ -80122,7 +80147,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 96
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -100978,6 +101003,18 @@ PrefabInstance:
     - target: {fileID: 4431632440758085749, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 6603584751233060439, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 1756604836}
+    - target: {fileID: 6603584751233060439, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7933422898659799978, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8427784294482802670, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
       propertyPath: m_Pivot.x

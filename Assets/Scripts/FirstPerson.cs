@@ -85,14 +85,14 @@ public class FirstPerson : MonoBehaviour
     public GameObject BlueFramePrefab;
     private GameObject InstantiatedBlueFrame = null;
 
-    //Level 2.5
+    //Level 3
     public bool loopExited = false;
     public bool inLoop = false;
     public bool outOfLoopTrigger = false;
     public GameObject OriginalRooms;
     public GameObject roomsOut;
 
-    //Level 3
+    //Level 4.1
     public bool barsAligned = false;
     public GameObject PlayerSnap2;
     public GameObject startWall;
@@ -102,7 +102,7 @@ public class FirstPerson : MonoBehaviour
     public GameObject endlessMirror;
     public GameObject BlackFrame;
 
-    //Level 4
+    //Level 4.2
     private GameObject collidedBlackFrame = null;
     public GameObject HeldBlackFrame;
     public GameObject BlackFramePrefab;
@@ -162,13 +162,13 @@ public class FirstPerson : MonoBehaviour
             Loop();
         }
 
-        //Debug from Level 4
+        //Debug from Level 4.2
         if (Input.GetKeyDown(KeyCode.Tab)) {
-            //2.5 done
+            //Level 3 done
             roomsOut.SetActive(true);
             Destroy(OriginalRooms);
 
-            //3 done
+            //Level 4.1 done
             Destroy(startWall);
             Destroy(oldWall);
             newWall.SetActive(true);
@@ -209,7 +209,8 @@ public class FirstPerson : MonoBehaviour
         if (Input.GetKeyDown(crouchKey)) {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
             HeldRedFrame.transform.localScale = new Vector3(1f, 1f/crouchYScale, 1f);
-            HeldBlueFrame.transform.localScale = new Vector3(1f, 1f/crouchYScale, 1f);
+            HeldBlueFrame.transform.localScale = new Vector3(1f/crouchYScale, 1f, 1f);
+            HeldBlackFrame.transform.localScale = new Vector3(1f, 1f/crouchYScale, 1f);
             rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
             cam.GetComponent<CameraScript>().LerpHands(1);
         }
@@ -217,6 +218,7 @@ public class FirstPerson : MonoBehaviour
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
             HeldRedFrame.transform.localScale = Vector3.one;
             HeldBlueFrame.transform.localScale = Vector3.one;
+            HeldBlackFrame.transform.localScale = Vector3.one;
             cam.GetComponent<CameraScript>().LerpHands(0);
         }
         if (Input.GetKeyDown(grabKey)) {
@@ -290,6 +292,7 @@ public class FirstPerson : MonoBehaviour
 
     private void ObjectSnaps()
     {
+        //Level 1
         redFrameSnapped = PositionSnap(InstantiatedRedFrame, 0.5f, 4f, 0, PerfectRedFrame);
         if (redFrameSnapped) {
             //Player pos and camera angle check
@@ -304,12 +307,13 @@ public class FirstPerson : MonoBehaviour
             }
         }
         
+        //Level 2
         if (!pictureMatched) {
-            bool player1_Snapped = PositionSnap(gameObject, 1.5f, 45f, 2, PlayerSnap1);
-            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.5f, 45f, 2, PlayerSnap1, true);
+            bool player1_Snapped = PositionSnap(gameObject, 1.2f, 35f, 2, PlayerSnap1);
+            bool camera1_Snapped = PositionSnap(cam.gameObject, 1.2f, 35f, 2, PlayerSnap1, true);
             
             if (player1_Snapped && camera1_Snapped) {
-                PositionSnap(gameObject, 1.5f, 45f, 0, PlayerSnap1);
+                PositionSnap(gameObject, 1.3f, 40f, 0, PlayerSnap1);
                 foreach (MeshRenderer mr in whiteToYellow) {
                     mr.material = yellowMat;
                 }
@@ -319,12 +323,13 @@ public class FirstPerson : MonoBehaviour
             }
         }
         
+        //Level 4.1
         if (loopExited && !barsAligned) {
-            bool player2_Snapped = PositionSnap(gameObject, 0.6f, 25f, 2, PlayerSnap2);
-            bool camera2_Snapped = PositionSnap(cam.gameObject, 0.6f, 25f, 2, PlayerSnap2, true);
+            bool player2_Snapped = PositionSnap(gameObject, 0.8f, 40f, 2, PlayerSnap2);
+            bool camera2_Snapped = PositionSnap(cam.gameObject, 1.3f, 70f, 2, PlayerSnap2, true);
             
             if (player2_Snapped && camera2_Snapped) {
-                PositionSnap(gameObject, 0.6f, 45f, 0, PlayerSnap2);
+                PositionSnap(gameObject, 0.8f, 40f, 0, PlayerSnap2);
                 Destroy(startWall);
                 Destroy(oldWall);
                 newWall.SetActive(true);

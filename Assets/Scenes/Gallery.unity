@@ -22352,8 +22352,8 @@ MonoBehaviour:
   Image_BG: {fileID: 1537854545}
   Text_Level: {fileID: 1430462586}
   Screen_Dimmer: {fileID: 1275631715}
-  sensX: 300
-  sensY: 300
+  sensX: 240
+  sensY: 240
   walkSpeed: 5
   groundDrag: 5
   state: 0

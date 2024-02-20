@@ -5,74 +5,126 @@ using UnityEngine;
 
 public class AudioManager : Singleton<AudioManager>
 {
-	public AudioSource audioSource;
+	public AudioSource audioSource1;
+	public AudioSource audioSource2;
+    //public AudioManager2 otherAudioManager;
 	public AudioClip[] songClips;
+    public bool isPlay1;
 	public float volume;
-	[SerializeField] public float multipliedVolume = 1f; //For if I want to have temporary volume changes in the future
-	private int currentSongIndex = 0;
-    private float trackTimer = 0f;
+	[SerializeField] public float multipliedVolume1 = 1f;
+	[SerializeField] public float multipliedVolume2 = 0f;
+	public int currentSongIndex = 0;
+    private float trackTimer1 = 0f;
+    private float trackTimer2 = 0f;
 
     new void Awake() {
         base.Awake();
-        multipliedVolume = 1f;
-		audioSource = GetComponent<AudioSource>();
+        multipliedVolume1 = 1f;
+        multipliedVolume2 = 0f;
+		//audioSource1 = GetComponent<AudioSource>();
+		//audioSource2 = GetComponent<AudioSource>();
+        /*
         if (songClips.Length != 0) {
-		    audioSource.clip = songClips[0];
-            audioSource.loop = true;
-		    audioSource.Play();
+		    audioSource1.clip = songClips[0];
+            audioSource1.loop = true;
+		    audioSource1.Play();
         }
+        */
     }
 
     void Update() {
-        audioSource.volume = volume * multipliedVolume;
+        audioSource1.volume = volume * multipliedVolume1;
+        audioSource2.volume = volume * multipliedVolume2;
 
-        if (audioSource.isPlaying) {
-            trackTimer += Time.deltaTime;
+        if (audioSource1.isPlaying) {
+            trackTimer1 += Time.deltaTime;
         }
-        
-        if (songClips.Length != 0) {
-            if (!audioSource.isPlaying || trackTimer >= audioSource.clip.length) {
-                //Loop
-            }
+        if (audioSource2.isPlaying) {
+            trackTimer2 += Time.deltaTime;
         }
     }
 
+    /*
 	public void NextSong() {
-        trackTimer = 0;
+        trackTimer1 = 0;
+        trackTimer2 = 0;
 		currentSongIndex++;
 		if (currentSongIndex == songClips.Length) {
 			currentSongIndex = 0;
 		}
 
-		audioSource.clip = songClips[currentSongIndex];
-		audioSource.Play();
+		audioSource1.clip = songClips[currentSongIndex];
+		audioSource1.Play();
 	}
+    */
 
 	public void ChangeSong(int songIndex) {
         if (currentSongIndex != songIndex) {
-            trackTimer = 0;
             currentSongIndex = songIndex;
+            if (isPlay1) {
+                FadeOut(1);
+                isPlay1 = false;
+                
+                trackTimer2 = 0;
 
-            audioSource.clip = songClips[currentSongIndex];
-            audioSource.Play();
+                audioSource2.clip = songClips[currentSongIndex];
+                FadeIn(2);
+                audioSource2.Play();
+            }
+            else {
+                FadeOut(2);
+                isPlay1 = true;
+
+                trackTimer1 = 0;
+
+                audioSource1.clip = songClips[currentSongIndex];
+                FadeIn(1);
+                audioSource1.Play();
+            }
         }
 	}
 
 	public void Stop() {
-		audioSource.Stop();
+		audioSource1.Stop();
 	}
 
-    public void Fade() {
-        StartCoroutine(FadeEffect());
+    public void FadeIn(int sourceID) {
+        StartCoroutine(FadeEffect(true, sourceID));
     }
 
-    public IEnumerator FadeEffect() {
+    public void FadeOut(int sourceID) {
+        StartCoroutine(FadeEffect(false, sourceID));
+    }
+
+    public IEnumerator FadeEffect(bool fadeIn, int sourceID) {
         //Fade out then Fade in again
         float startTime = Time.time;
-        while (Time.time-startTime < 0.7f) {      //Done in 5 seconds
-            multipliedVolume = Mathf.Cos(2 * Mathf.PI * (Time.time-startTime) / 5f);
+        while (Time.time-startTime < 5f) {      //Done in 5 seconds
+            if (fadeIn) {
+                if (sourceID == 1)
+                    multipliedVolume1 = 1 - (1f + Mathf.Cos(Mathf.PI * (Time.time-startTime) / 5f)) / 2f;
+                else
+                    multipliedVolume2 = 1 - (1f + Mathf.Cos(Mathf.PI * (Time.time-startTime) / 5f)) / 2f;
+            }
+            else {
+                if (sourceID == 1)
+                    multipliedVolume1 = (1f + Mathf.Cos(Mathf.PI * (Time.time-startTime) / 5f)) / 2f;
+                else
+                    multipliedVolume2 = (1f + Mathf.Cos(Mathf.PI * (Time.time-startTime) / 5f)) / 2f;
+            }
             yield return null;
         }
-        multipliedVolume = 1f;
+        if (fadeIn) {
+            if (sourceID == 1)
+                multipliedVolume1 = 1f;
+            else
+                multipliedVolume2 = 1f;
+        }
+        else {
+            if (sourceID == 1)
+                multipliedVolume1 = 0f;
+            else
+                multipliedVolume2 = 0f;
+        }
     }
 }

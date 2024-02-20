@@ -21,9 +21,11 @@ public class GameManager : Singleton<GameManager>
     void Update()
     {
         //Debug
+        /*
         if (Input.GetKeyDown(KeyCode.R)) {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+        */
     }
 
     /*

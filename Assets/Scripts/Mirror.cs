@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Mirror : MonoBehaviour
 {
@@ -67,9 +68,19 @@ public class Mirror : MonoBehaviour
             if (PassedThru(enterPos, exitPos)) {
                 if (level_Mirror.currentMirrorID == mirrorID) {
                     level_Mirror.currentMirrorID++;
+                    //SFX for correct
+                    if (level_Mirror.currentMirrorID == 5) {
+                        //SFX for complete
+                        StartCoroutine(other.GetComponent<FirstPerson>().Tada(0f, 0.4f));
+                        level_Mirror.currentMirrorID++;
+                        StartCoroutine(other.GetComponent<FirstPerson>().ScreenDarken(1f, 1f, new Color(0f, 0f, 0f, 0.1f), Color.black));
+                        Invoke("ToEnd", 2f);
+                    }
                 }
                 else {
+                    //SFX for wrong
                     level_Mirror.currentMirrorID = 0;
+                    StartCoroutine(other.GetComponent<FirstPerson>().Jitter(0f, 0.3f));
                 }
             }
         }
@@ -89,5 +100,10 @@ public class Mirror : MonoBehaviour
     private float SignedDistanceToPlane(Vector3 point, Vector3 planeNormal, Vector3 planePosition)
     {
         return Vector3.Dot(planeNormal, point - planePosition);
+    }
+
+    private void ToEnd()
+    {
+        SceneManager.LoadScene("End", LoadSceneMode.Single);
     }
 }

@@ -8,9 +8,11 @@ using UnityEngine.Rendering;
 using URPGlitch.Runtime.AnalogGlitch;
 using URPGlitch.Runtime.DigitalGlitch;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 public class FirstPerson : MonoBehaviour
 {
+    private bool lockCamera = true;
     public int part = 0;
     public bool transitioning = false;
 
@@ -180,21 +182,31 @@ public class FirstPerson : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
+        if (!lockCamera) {
+            float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
+            float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
 
-        yRotation += mouseX;
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+            yRotation += mouseX;
+            xRotation -= mouseY;
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            
+            transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
+            cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        }
         
         forward = orientation.forward;
         right = orientation.right;
 
         //Ground check
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer);
+        Vector3 posCheck1 = transform.position + Vector3.forward/2f + Vector3.right/2f;
+        Vector3 posCheck2 = transform.position + Vector3.forward/2f - Vector3.right/2f;
+        Vector3 posCheck3 = transform.position - Vector3.forward/2f + Vector3.right/2f;
+        Vector3 posCheck4 = transform.position - Vector3.forward/2f - Vector3.right/2f;
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer) ||
+                    Physics.Raycast(posCheck1, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer) ||
+                    Physics.Raycast(posCheck2, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer) ||
+                    Physics.Raycast(posCheck3, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer) ||
+                    Physics.Raycast(posCheck4, Vector3.down, playerHeight * 0.5f + 0.05f, groundLayer);
 
         if (!transitioning)
             CharacterInputs();
@@ -215,7 +227,8 @@ public class FirstPerson : MonoBehaviour
                 Loop();
             }
         }
-        else if (Vector3.Distance(transform.position, MirrorCenter.transform.position) > 175f){
+        else if (Vector3.Distance(transform.position, MirrorCenter.transform.position) > 55f){
+            StartCoroutine(Tada(0f, 0.3f));
             PositionSnap(gameObject, 1000f, 360f, 0, RespawnPoint, true);
         }
 
@@ -309,7 +322,9 @@ public class FirstPerson : MonoBehaviour
                     heldItemID = 1;
                     if (!thirdAreaEntered) {
                         thirdAreaEntered = true;
-                        StartCoroutine(NewArea(1.2f, 0.6f, 2f, 4, 2));
+                        StartCoroutine(Tada(0.2f, 0.4f));
+                        AudioManager.Instance.ChangeSong(3);
+                        StartCoroutine(NewArea(3.2f, 0.6f, 2f, 4, 2));
                     }
                     Destroy(collidedBlueFrame);
                     collidedBlueFrame = null;
@@ -449,6 +464,7 @@ public class FirstPerson : MonoBehaviour
         if (outOfLoopTrigger) {
             if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 180, 0)) < 70f) {
                 StartCoroutine(Tada(0f, 0.4f));
+                AudioManager.Instance.ChangeSong(4);
                 StartCoroutine(NewArea(0.5f, 0.6f, 2f, 6, 2));
                 inLoop = false;
                 loopExited = true;
@@ -528,6 +544,7 @@ public class FirstPerson : MonoBehaviour
         }
         if (!area2Entered && other.gameObject.layer == LayerMask.NameToLayer("EntranceCheck")) {
             area2Entered = true;
+            AudioManager.Instance.ChangeSong(2);
             StartCoroutine(NewArea(0f, 0.6f, 2f, 2, 2, true));
         }
         if (!loopExited) {
@@ -547,8 +564,12 @@ public class FirstPerson : MonoBehaviour
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("FallTrigger")) {
             StartCoroutine(Tada(0f, 0.4f));
-            StartCoroutine(ScreenDarken(0.5f, 1.2f, Color.clear, Color.black));
+            StartCoroutine(ScreenDarken(0.5f, 1.7f, Color.clear, Color.black));
             Destroy(BlackFloor);
+        }
+        if (other.gameObject.layer == LayerMask.NameToLayer("TransitionTrigger")) {
+            AudioManager.Instance.ChangeSong(5);
+            ToMirror();
         }
     }
 
@@ -616,7 +637,29 @@ public class FirstPerson : MonoBehaviour
     }
     */
 
-    private IEnumerator Tada(float delay, float duration) {
+    public IEnumerator Jitter(float delay, float duration) {
+        transitioning = true;
+        float timer = 0f;
+        float t;
+
+        yield return new WaitForSeconds(delay);
+
+        while (timer < duration)
+        {
+            t = Mathf.Clamp01(timer/duration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            analogGlitchVolume.scanLineJitter.value = 0.4f;
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        //Todo: Exit back to original settings
+        transitioning = false;
+        analogGlitchVolume.scanLineJitter.value = 0.02f;
+    }
+
+    public IEnumerator Tada(float delay, float duration) {
         transitioning = true;
         float timer = 0f;
         float t;
@@ -751,7 +794,7 @@ public class FirstPerson : MonoBehaviour
         Text_Level.color = Color.clear;
     }
     
-    private IEnumerator ScreenDarken(float delay, float duration, Color fromColor, Color toColor) {
+    public IEnumerator ScreenDarken(float delay, float duration, Color fromColor, Color toColor) {
         yield return new WaitForSeconds(delay);
 
         transitioning = true;
@@ -769,5 +812,11 @@ public class FirstPerson : MonoBehaviour
         //Todo: Exit back to original settings
         transitioning = false;
         Screen_Dimmer.color = toColor;
+        lockCamera = false;
+    }
+
+    private void ToMirror()
+    {
+        SceneManager.LoadScene("Mirror", LoadSceneMode.Single);
     }
 }

@@ -7,9 +7,11 @@ using UnityEngine.UI;
 using UnityEngine.Rendering;
 using URPGlitch.Runtime.AnalogGlitch;
 using URPGlitch.Runtime.DigitalGlitch;
+using Unity.VisualScripting;
 
 public class FirstPerson : MonoBehaviour
 {
+    public int part = 0;
     public bool transitioning = false;
 
     public Camera cam;
@@ -17,10 +19,10 @@ public class FirstPerson : MonoBehaviour
 
     public Image Image_BG;
     public TextMeshProUGUI Text_Level;
+    public Image Screen_Dimmer;
 
     private AnalogGlitchVolume analogGlitchVolume;
     private DigitalGlitchVolume digitalGlitchVolume;
-    private int textPointer = 0;
     private List<String> textToShow = new List<String>{
         "1",
         "Scaffold",
@@ -29,9 +31,11 @@ public class FirstPerson : MonoBehaviour
         "3",
         "Cycle Breaker",
         "4.1",
-        "Hole - (Formation)",
+        "Formation",
         "4.2",
-        "Hole - (The Third Eye)",
+        "Third Eye",
+        "5",
+        "Reflection",
     };
 
     public float sensX;
@@ -102,6 +106,7 @@ public class FirstPerson : MonoBehaviour
     public GameObject newWall0;
 
     //Level 2
+    private bool area2Entered = false;
     public List<MeshRenderer> whiteToYellow;
     public Material yellowMat;
     public bool pictureMatched = false;
@@ -115,6 +120,7 @@ public class FirstPerson : MonoBehaviour
     private GameObject InstantiatedBlueFrame = null;
 
     //Level 3
+    private bool thirdAreaEntered = false;
     public bool loopExited = false;
     public bool inLoop = false;
     public bool outOfLoopTrigger = false;
@@ -140,6 +146,10 @@ public class FirstPerson : MonoBehaviour
     //Fall
     public GameObject BlackFloor;
 
+    //Level 5
+    public GameObject RespawnPoint;
+    public GameObject MirrorCenter;
+
 
     // Start is called before the first frame update
     void Start()
@@ -156,12 +166,20 @@ public class FirstPerson : MonoBehaviour
 
         globalVolume.profile.TryGet<AnalogGlitchVolume>(out analogGlitchVolume);
         globalVolume.profile.TryGet<DigitalGlitchVolume>(out digitalGlitchVolume);
+        
+        if (part == 0) {
+            StartCoroutine(ScreenDarken(0f, 1.2f, new Color(0f, 0f, 0f, 0.75f), Color.clear));
+            StartCoroutine(NewArea(1.8f, 0.6f, 2f, 0, 2));
+        } else {
+            Screen_Dimmer.color = Color.black;
+            StartCoroutine(ScreenDarken(1f, 1.2f, Color.black, new Color(0f, 0f, 0f, 0.1f)));
+            StartCoroutine(NewArea(2.5f, 0.6f, 2f, 10, 2));
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Mouse input
         float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
         float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
 
@@ -191,12 +209,18 @@ public class FirstPerson : MonoBehaviour
             rb.drag = 0;
         
         //Snaps
-        ObjectSnaps();
-        if (!loopExited && inLoop) {
-            Loop();
+        if (part == 0) {
+            ObjectSnaps();
+            if (!loopExited && inLoop) {
+                Loop();
+            }
+        }
+        else if (Vector3.Distance(transform.position, MirrorCenter.transform.position) > 175f){
+            PositionSnap(gameObject, 1000f, 360f, 0, RespawnPoint, true);
         }
 
         //Debug from Level 4.2
+        /*
         if (Input.GetKeyDown(KeyCode.Tab)) {
             //Level 3 done
             roomsOut.SetActive(true);
@@ -217,6 +241,7 @@ public class FirstPerson : MonoBehaviour
             newRoom.SetActive(true);
             pictureMatched = true;
         }
+        */
     }
 
     private void FixedUpdate()
@@ -282,6 +307,10 @@ public class FirstPerson : MonoBehaviour
                 }
                 else if (collidedBlueFrame != null) {
                     heldItemID = 1;
+                    if (!thirdAreaEntered) {
+                        thirdAreaEntered = true;
+                        StartCoroutine(NewArea(1.2f, 0.6f, 2f, 4, 2));
+                    }
                     Destroy(collidedBlueFrame);
                     collidedBlueFrame = null;
                     InstantiatedBlueFrame = null;
@@ -370,6 +399,7 @@ public class FirstPerson : MonoBehaviour
             
             if (player2_Snapped/* && camera2_Snapped*/) {
                 StartCoroutine(Tada(0f, 0.4f));
+                StartCoroutine(NewArea(1.2f, 0.6f, 2f, 8, 2));
                 PositionSnap(gameObject, 0.8f, 40f, 0, PlayerSnap2);
                 Destroy(startWall);
                 Destroy(oldWall);
@@ -419,6 +449,7 @@ public class FirstPerson : MonoBehaviour
         if (outOfLoopTrigger) {
             if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 180, 0)) < 70f) {
                 StartCoroutine(Tada(0f, 0.4f));
+                StartCoroutine(NewArea(0.5f, 0.6f, 2f, 6, 2));
                 inLoop = false;
                 loopExited = true;
                 
@@ -495,6 +526,10 @@ public class FirstPerson : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("BlackFrame")) {
             collidedBlackFrame = other.gameObject;
         }
+        if (!area2Entered && other.gameObject.layer == LayerMask.NameToLayer("EntranceCheck")) {
+            area2Entered = true;
+            StartCoroutine(NewArea(0f, 0.6f, 2f, 2, 2, true));
+        }
         if (!loopExited) {
             if (other.gameObject.layer == LayerMask.NameToLayer("LoopTrigger")) {
                 inLoop = true;
@@ -512,6 +547,7 @@ public class FirstPerson : MonoBehaviour
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("FallTrigger")) {
             StartCoroutine(Tada(0f, 0.4f));
+            StartCoroutine(ScreenDarken(0.5f, 1.2f, Color.clear, Color.black));
             Destroy(BlackFloor);
         }
     }
@@ -608,34 +644,130 @@ public class FirstPerson : MonoBehaviour
         digitalGlitchVolume.intensity.value = 0f;
     }
 
-    private IEnumerator NewArea(float delay, float duration, int textIndex) {
+    private IEnumerator NewArea(float delay, float glitchDuration, float duration, int textIndex, int numOfSentences = 1, bool fullPause = false) {
+        yield return new WaitForSeconds(delay);
+
+        transitioning = true;
+        float timer = 0f;
+        //float t;
+        float sineWave;
+        float sineWave2;
+
+        Color blackAlphaColor = new Color(0f, 0f, 0f, 0f);
+        Color blackColor = new Color(0f, 0f, 0f, 0.36f);
+        Color whiteAlphaColor = new Color(0.84f, 0.84f, 0.84f, 0f);
+        Color whiteColor = new Color(0.84f, 0.84f, 0.84f, 1f);
+
+
+        analogGlitchVolume.scanLineJitter.value = 0.1f;
+        digitalGlitchVolume.intensity.value = 0.05f;
+
+        Image_BG.color = Color.clear;
+        Text_Level.color = Color.clear;
+        Text_Level.text = textToShow[textIndex];
+        //yield return new WaitForSeconds(glitchDuration);
+        if (numOfSentences == 1) {
+            while (timer < duration)
+            {
+                sineWave = 3f * Mathf.Sin(Mathf.PI * timer / duration);
+                sineWave2 = 5f * Mathf.Sin(Mathf.PI * timer / duration / 2f);
+
+                if (timer > glitchDuration) {
+                    if (timer < (duration-glitchDuration)) {
+                        analogGlitchVolume.scanLineJitter.value = 0.02f;
+                        digitalGlitchVolume.intensity.value = 0f;
+                    }
+                    else {
+                        analogGlitchVolume.scanLineJitter.value = 0.1f;
+                        digitalGlitchVolume.intensity.value = 0.05f;
+                    }
+                }
+
+                Image_BG.color = Color.Lerp(blackAlphaColor, blackColor, sineWave);
+                Text_Level.color = Color.Lerp(whiteAlphaColor, whiteColor, sineWave);
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+            transitioning = false;
+        }
+        else {
+            while (timer < duration)
+            {
+                sineWave = 3f * Mathf.Sin(Mathf.PI * timer / duration);
+                sineWave2 = 5f * Mathf.Sin(Mathf.PI * timer / duration / 2f);
+
+                if (timer > glitchDuration) {
+                    if (timer < (duration-glitchDuration)) {
+                        analogGlitchVolume.scanLineJitter.value = 0.02f;
+                        digitalGlitchVolume.intensity.value = 0f;
+                    }
+                    else {
+                        analogGlitchVolume.scanLineJitter.value = 0.1f;
+                    }
+                }
+
+                Image_BG.color = Color.Lerp(blackAlphaColor, blackColor, sineWave2);
+                Text_Level.color = Color.Lerp(whiteAlphaColor, whiteColor, sineWave);
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            if (!fullPause)
+                transitioning = false;
+            timer = 0f;
+            Text_Level.text = textToShow[textIndex+1];
+
+            while (timer < duration)
+            {
+                sineWave = 3f * Mathf.Sin(Mathf.PI * timer / duration);
+                sineWave2 = 5f * Mathf.Sin(Mathf.PI * (timer + 1f) / duration / 2f);
+
+                if (timer > glitchDuration) {
+                    if (timer > (duration-glitchDuration)) {
+                        analogGlitchVolume.scanLineJitter.value = 0.02f;
+                    }
+                    else {
+                        analogGlitchVolume.scanLineJitter.value = 0.1f;
+                        digitalGlitchVolume.intensity.value = 0.05f;
+                    }
+                }
+
+                Image_BG.color = Color.Lerp(blackAlphaColor, blackColor, sineWave2);
+                Text_Level.color = Color.Lerp(whiteAlphaColor, whiteColor, sineWave);
+
+                timer += Time.deltaTime;
+                yield return null;
+            }
+            transitioning = false;
+        }
+
+
+        //Todo: Exit back to original settings
+        analogGlitchVolume.scanLineJitter.value = 0.02f;
+        digitalGlitchVolume.intensity.value = 0f;
+        Image_BG.color = Color.clear;
+        Text_Level.color = Color.clear;
+    }
+    
+    private IEnumerator ScreenDarken(float delay, float duration, Color fromColor, Color toColor) {
+        yield return new WaitForSeconds(delay);
+
         transitioning = true;
         float timer = 0f;
         float t;
 
-        yield return new WaitForSeconds(delay);
-        
-        
-
         while (timer < duration)
         {
             t = Mathf.Clamp01(timer/duration);
-            t = Mathf.SmoothStep(0f, 1f, t);
-
-            //analogGlitchVolume.verticalJump.value = 0.1f;
-            //analogGlitchVolume.horizontalShake.value = 0.25f;
-            analogGlitchVolume.scanLineJitter.value = 0.1f;
-            analogGlitchVolume.colorDrift.value = 0.15f;
-            //digitalGlitchVolume.intensity.value = 0.01f;
+            Screen_Dimmer.color = Color.Lerp(fromColor, toColor, t);
 
             timer += Time.deltaTime;
             yield return null;
         }
-
         //Todo: Exit back to original settings
         transitioning = false;
-        analogGlitchVolume.scanLineJitter.value = 0.02f;
-        analogGlitchVolume.colorDrift.value = 0f;
-        digitalGlitchVolume.intensity.value = 0f;
+        Screen_Dimmer.color = toColor;
     }
 }

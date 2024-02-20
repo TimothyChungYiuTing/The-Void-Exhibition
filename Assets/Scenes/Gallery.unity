@@ -18205,7 +18205,7 @@ GameObject:
   m_Component:
   - component: {fileID: 508687144}
   - component: {fileID: 508687143}
-  m_Layer: 0
+  m_Layer: 21
   m_Name: EntranceCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20316,13 +20316,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b66c21d8f02ce43bf70ece1243afcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transitioning: 0
   cam: {fileID: 963194227}
   globalVolume: {fileID: 728177309}
   Image_BG: {fileID: 1537854545}
   Text_Level: {fileID: 1430462586}
+  Screen_Dimmer: {fileID: 1275631715}
   sensX: 300
   sensY: 300
-  walkSpeed: 6.5
+  walkSpeed: 5.5
   groundDrag: 5
   state: 0
   jumpForce: 12
@@ -54257,6 +54259,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 221
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1275631715 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7645252826066762334, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
+  m_PrefabInstance: {fileID: 4127882405328537594}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1277778722
 GameObject:
   m_ObjectHideFlags: 0
@@ -101014,7 +101027,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7933422898659799978, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8427784294482802670, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
       propertyPath: m_Pivot.x

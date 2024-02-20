@@ -59247,8 +59247,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.7304776, y: 1, z: 1.5507764}
-  m_Center: {x: -0.6528692, y: 0, z: 1.0296472}
+  m_Size: {x: 1.911755, y: 1, z: 1.7723035}
+  m_Center: {x: -0.5622305, y: 0, z: 0.91888374}
 --- !u!4 &1274698232
 Transform:
   m_ObjectHideFlags: 0
@@ -75807,7 +75807,6 @@ MonoBehaviour:
   cam: {fileID: 1597877699}
   cameraPos1: {fileID: 2119741218}
   cameraPos2: {fileID: 960908834}
-  canvas: {fileID: 4127882405328537595}
   Text_Level: {fileID: 1430462586}
   Screen_Dimmer: {fileID: 1275631715}
 --- !u!4 &1562416339
@@ -110014,11 +110013,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
---- !u!223 &4127882405328537595 stripped
-Canvas:
-  m_CorrespondingSourceObject: {fileID: 6603584751233060439, guid: d36bc096df9b6ce4aa6ecd59168e0e89, type: 3}
-  m_PrefabInstance: {fileID: 4127882405328537594}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4173766253479159419
 PrefabInstance:
   m_ObjectHideFlags: 0

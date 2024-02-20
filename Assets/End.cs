@@ -17,6 +17,8 @@ public class End : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = false;
         Screen_Dimmer.color = Color.black;
         StartCoroutine(ScreenDarken(1f, 1.2f, Color.black, new Color(0f, 0f, 0f, 0.1f)));
         AudioManager.Instance.ChangeSong(6);

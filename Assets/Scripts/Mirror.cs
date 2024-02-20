@@ -71,7 +71,7 @@ public class Mirror : MonoBehaviour
                     //SFX for correct
                     if (level_Mirror.currentMirrorID == 5) {
                         //SFX for complete
-                        StartCoroutine(other.GetComponent<FirstPerson>().Tada(0f, 0.4f));
+                        StartCoroutine(other.GetComponent<FirstPerson>().Tada(0f, 0.8f));
                         level_Mirror.currentMirrorID++;
                         StartCoroutine(other.GetComponent<FirstPerson>().ScreenDarken(1f, 1f, new Color(0f, 0f, 0f, 0.1f), Color.black));
                         Invoke("ToEnd", 2f);
@@ -81,6 +81,7 @@ public class Mirror : MonoBehaviour
                     //SFX for wrong
                     level_Mirror.currentMirrorID = 0;
                     StartCoroutine(other.GetComponent<FirstPerson>().Jitter(0f, 0.3f));
+                    other.GetComponent<FirstPerson>().PlayGlitchSFX();
                 }
             }
         }

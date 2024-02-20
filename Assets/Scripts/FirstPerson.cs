@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 public class FirstPerson : MonoBehaviour
 {
-    private bool lockCamera = true;
+    //private bool lockCamera = true;
     public int part = 0;
     public bool transitioning = false;
 
@@ -152,12 +152,20 @@ public class FirstPerson : MonoBehaviour
     public GameObject RespawnPoint;
     public GameObject MirrorCenter;
 
+    //Audio
+    private AudioSource audioSource;
+    public AudioClip GrabSFX;
+    public AudioClip PickUpSFX;
+    public AudioClip PutDownSFX;
+    public AudioClip GlitchSFX;
+
 
     // Start is called before the first frame update
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        audioSource = GetComponent<AudioSource>();
         
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
@@ -182,7 +190,7 @@ public class FirstPerson : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!lockCamera) {
+        //if (!lockCamera) {
             float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
             float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
 
@@ -192,7 +200,7 @@ public class FirstPerson : MonoBehaviour
             
             transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
             cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
-        }
+        //}
         
         forward = orientation.forward;
         right = orientation.right;
@@ -229,6 +237,7 @@ public class FirstPerson : MonoBehaviour
         }
         else if (Vector3.Distance(transform.position, MirrorCenter.transform.position) > 55f){
             StartCoroutine(Tada(0f, 0.3f));
+            PlayGlitchSFX();
             PositionSnap(gameObject, 1000f, 360f, 0, RespawnPoint, true);
         }
 
@@ -297,6 +306,7 @@ public class FirstPerson : MonoBehaviour
         if (Input.GetKeyDown(grabKey)) {
             //Press E
             cam.GetComponent<CameraScript>().HandsGrab();
+            audioSource.clip = GrabSFX;
             
             if (state != MovementState.crouching) {
                 if (heldItemID == 0) {
@@ -312,6 +322,7 @@ public class FirstPerson : MonoBehaviour
             
             if (heldItemID == -1) {
                 if (collidedRedFrame != null) {
+                    audioSource.clip = PickUpSFX;
                     heldItemID = 0;
                     Destroy(collidedRedFrame);
                     collidedRedFrame = null;
@@ -319,6 +330,7 @@ public class FirstPerson : MonoBehaviour
                     HeldRedFrame.SetActive(true);
                 }
                 else if (collidedBlueFrame != null) {
+                    audioSource.clip = PickUpSFX;
                     heldItemID = 1;
                     if (!thirdAreaEntered) {
                         thirdAreaEntered = true;
@@ -332,6 +344,7 @@ public class FirstPerson : MonoBehaviour
                     HeldBlueFrame.SetActive(true);
                 }
                 else if (collidedBlackFrame != null) {
+                    audioSource.clip = PickUpSFX;
                     heldItemID = 2;
                     Destroy(collidedBlackFrame);
                     collidedBlackFrame = null;
@@ -339,12 +352,15 @@ public class FirstPerson : MonoBehaviour
                     HeldBlackFrame.SetActive(true);
                 }
             }
+
+            audioSource.Play();
         }
     }
 
     private void TryPutDownBlackFrame()
     {
         if (HeldBlackFrame.GetComponent<HeldBlackFrame>().canPlace) {
+            audioSource.clip = PutDownSFX;
             heldItemID = -1;
             InstantiatedBlackFrame = Instantiate(BlackFramePrefab, HeldBlackFrame.transform.position, HeldBlackFrame.transform.rotation);
             HeldBlackFrame.SetActive(false);
@@ -354,6 +370,7 @@ public class FirstPerson : MonoBehaviour
     private void TryPutDownBlueFrame()
     {
         if (HeldBlueFrame.GetComponent<HeldBlueFrame>().canPlace) {
+            audioSource.clip = PutDownSFX;
             heldItemID = -1;
             InstantiatedBlueFrame = Instantiate(BlueFramePrefab, HeldBlueFrame.transform.position, HeldBlueFrame.transform.rotation);
             HeldBlueFrame.SetActive(false);
@@ -363,11 +380,18 @@ public class FirstPerson : MonoBehaviour
     private void TryPutDownRedFrame()
     {
         if (HeldRedFrame.GetComponent<HeldRedFrame>().canPlace) {
+            audioSource.clip = PutDownSFX;
             heldItemID = -1;
             InstantiatedRedFrame = Instantiate(RedFramePrefab, HeldRedFrame.transform.position, HeldRedFrame.transform.rotation);
             HeldRedFrame.SetActive(false);
         }
     }
+
+    public void PlayGlitchSFX()
+    {
+        audioSource.clip = GlitchSFX;
+        audioSource.Play();
+    } 
 
     private void ObjectSnaps()
     {
@@ -381,6 +405,7 @@ public class FirstPerson : MonoBehaviour
 
                 if (player0_Snapped && camera0_Snapped) {
                     StartCoroutine(Tada(0f, 0.4f));
+                    PlayGlitchSFX();
                     Destroy(InstantiatedRedFrame);
                     PositionSnap(gameObject, 0.8f, 7f, 0, PlayerSnap0);
                     Destroy(wall0);
@@ -397,6 +422,7 @@ public class FirstPerson : MonoBehaviour
             
             if (player1_Snapped && camera1_Snapped) {
                 StartCoroutine(Tada(0f, 0.4f));
+                PlayGlitchSFX();
                 PositionSnap(gameObject, 1.3f, 40f, 0, PlayerSnap1);
                 foreach (MeshRenderer mr in whiteToYellow) {
                     mr.material = yellowMat;
@@ -414,6 +440,7 @@ public class FirstPerson : MonoBehaviour
             
             if (player2_Snapped/* && camera2_Snapped*/) {
                 StartCoroutine(Tada(0f, 0.4f));
+                PlayGlitchSFX();
                 StartCoroutine(NewArea(1.2f, 0.6f, 2f, 8, 2));
                 PositionSnap(gameObject, 0.8f, 40f, 0, PlayerSnap2);
                 Destroy(startWall);
@@ -464,6 +491,7 @@ public class FirstPerson : MonoBehaviour
         if (outOfLoopTrigger) {
             if (Quaternion.Angle(cam.transform.rotation, Quaternion.Euler(0, 180, 0)) < 70f) {
                 StartCoroutine(Tada(0f, 0.4f));
+                PlayGlitchSFX();
                 AudioManager.Instance.ChangeSong(4);
                 StartCoroutine(NewArea(0.5f, 0.6f, 2f, 6, 2));
                 inLoop = false;
@@ -564,7 +592,7 @@ public class FirstPerson : MonoBehaviour
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("FallTrigger")) {
             StartCoroutine(Tada(0f, 0.4f));
-            StartCoroutine(ScreenDarken(0.5f, 1.7f, Color.clear, Color.black));
+            StartCoroutine(ScreenDarken(0.5f, 2.3f, Color.clear, Color.black));
             Destroy(BlackFloor);
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("TransitionTrigger")) {
@@ -812,7 +840,7 @@ public class FirstPerson : MonoBehaviour
         //Todo: Exit back to original settings
         transitioning = false;
         Screen_Dimmer.color = toColor;
-        lockCamera = false;
+        //lockCamera = false;
     }
 
     private void ToMirror()
